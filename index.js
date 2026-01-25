@@ -11,9 +11,35 @@ const start = async () => {
     try {
         await connectDB(); // <-- block startup
 
-        app.use(cors()); // allow all origins, safe for dev
+        const allowedOrigins = process.env.CLIENT_ORIGIN
+            ? process.env.CLIENT_ORIGIN.split(",")
+            : [];
+
+        app.use(cors({
+            origin: function (origin, callback) {
+                // allow requests with no origin (Postman, curl)
+                if (!origin) return callback(null, true);
+
+                if (allowedOrigins.includes(origin)) {
+                    return callback(null, true);
+                }
+
+                return callback(new Error("Not allowed by CORS"));
+            },
+            methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            allowedHeaders: ["Content-Type", "Authorization"],
+            credentials: true
+        }));
+
+        app.options("*", cors());
 
         app.use(express.json());
+
+        app.get("/", (req, res) => {
+            res.status(200).json({ status: "ok" });
+        });
+
+        
         app.use("/api/auth", require("./route/auth.route"));
         app.use("/api/products", require("./route/product.route"));
         app.use(errorHandler);
@@ -21,10 +47,11 @@ const start = async () => {
         const PORT = process.env.PORT || 3000;
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
+            console.log("CORS allowed origins:", allowedOrigins);
         });
     } catch (err) {
         console.error("Application failed to start");
-        process.exit(1); // <-- ONLY place this is acceptable
+        process.exit(1);
     }
 };
 
