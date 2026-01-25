@@ -14,6 +14,7 @@ const start = async () => {
         app.use(cors()); // allow all origins, safe for dev
 
         app.use(express.json());
+        app.use("/api/auth", require("./route/auth.route"));
         app.use("/api/products", require("./route/product.route"));
         app.use(errorHandler);
 
