@@ -31,7 +31,7 @@ const start = async () => {
             credentials: true
         }));
 
-        app.options("*", cors());
+        // app.options("*", cors());
 
         app.use(express.json());
 
@@ -39,7 +39,7 @@ const start = async () => {
             res.status(200).json({ status: "ok" });
         });
 
-        
+
         app.use("/api/auth", require("./route/auth.route"));
         app.use("/api/products", require("./route/product.route"));
         app.use(errorHandler);
@@ -50,7 +50,7 @@ const start = async () => {
             console.log("CORS allowed origins:", allowedOrigins);
         });
     } catch (err) {
-        console.error("Application failed to start");
+        console.error("Application failed to start", err);
         process.exit(1);
     }
 };
